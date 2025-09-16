@@ -53,7 +53,7 @@ The `scrape_add_links_nblm_script.py` script enhances URL extraction and Noteboo
   cd ../add_links_notebook
   ```
 
-2. Create a virtual environment. 
+2. Create a virtual environment if it is not available. 
   ```bash
   # If using this for the first time, create a new virtual environment
   python3 -m venv .venv
@@ -89,7 +89,7 @@ The `scrape_add_links_nblm_script.py` script enhances URL extraction and Noteboo
   cd ../add_scrapped_links_notebooklm
   ```
 
-**Note**: Always ensure the virtual environment is active (you should see `(.venv)` in your terminal prompt) before running the scripts.
+**Note**: Always ensure the virtual environment is active (you should see `(.venv)` in your terminal prompt) before running the script.
 
 ## Different workflows to run the script
 
