@@ -47,44 +47,43 @@ The `scrape_add_links_nblm_script.py` script enhances URL extraction and Noteboo
 
 ### Procedure
 
-1. OPTIONAL - if Project Root is different to script directory
-  From the script directory, navigate to where the virtual environment is located if it is different to where the ADD_LINKS_NOTEBOOK files are stored:
+1. OPTIONAL: If the project root is different from the script directory `add_links_notebook`, navigate to the location where the `.venv` directory is located:
   ```bash
   # Navigate to project root (where .venv is located) 
   cd ../add_links_notebook
   ```
 
-2. Create a virtual environment or activate an existing environment:
+2. Create a virtual environment. 
   ```bash
   # If using this for the first time, create a new virtual environment
   python3 -m venv .venv
   ```
-
+3. Activate the virtual environment:
   ```bash
   # Activate the existing virtual environment
   source .venv/bin/activate
   ```
-3. Install dependencies:
+4. Install dependencies.
   ```bash
   python3 -m pip install -r requirements.txt
   ```
 
-4. Install browser binaries for Playwright - assuming you haven't installed it by running requirements.txt.
+5. Install browser binaries for Playwright.
   ```bash
   python3 -m playwright install
   ```
 
-5. Install Playwright Browser:
+6. Install the Playwright browser.
   ```bash
   # Check Playwright is installed
   playwright --version
   ```
-6. Install Chromium browser for automation - needed for authentication
+7. Install Chromium browser to automate authentication.
   ```bash
   playwright install chromium
   ```
 
-7. OPTIONAL - if your Project Root is different to script directory, return to Script Directory
+8. OPTIONAL: If your project root is different from the script directory, navigate back to the script directory:
   ```bash
   # Navigate back to script directory
   cd ../add_scrapped_links_notebooklm
@@ -150,7 +149,35 @@ python3 scrape_add_links_nblm_script.py --notebook "https://notebooklm.google.co
 - **`CQA_res.txt`**: Static CQA resources (always included automatically)
 - **Combined**: Script automatically merges both files when adding to notebook
 
-## Detailed usage of the script
+## Advanced options to use the script
+
+The command line options include:
+
+**Help file**
+- `--help`: Lists all available options
+
+**Extraction Mode**:
+- `--extract-toc URL`: Documentation URL to scrape (with or without version)
+- `--toc-output FILE`: Output file for extracted links (default: urls.txt)  
+- `--versions LIST`: Comma-separated versions (default: detected version or latest)
+
+**Notebook Mode**:
+- `--notebook URL`: NotebookLM notebook URL
+- `--links-file FILE`: Links file (default: urls.txt, always includes CQA_res.txt)
+- `--links URL [URL...]`: Individual URLs to add
+- `--skip-cqa`: Skip including CQA_res.txt when using file-based links
+
+**Authentication**:
+- `--login`: Run authentication process
+- `--profile-path PATH`: Browser profile directory (default: ~/.browser_automation)
+
+**Combined Workflows**:
+You can combine any of the three main operations in a single command:
+- `--extract-toc` + `--notebook`: Extract then add
+- `--login` + `--notebook`: Login then add  
+- `--extract-toc` + `--login` + `--notebook`: Full workflow
+
+## Advanced usage of the script
 
 ### Combined workflow examples
 Run any of the following commands based on your use case:
@@ -230,34 +257,6 @@ python3 scrape_add_links_nblm_script.py --notebook "NOTEBOOK_URL" --links-file c
 # Full workflow with skip CQA
 python3 scrape_add_links_nblm_script.py --extract-toc "BASE_URL" --notebook "NOTEBOOK_URL" --skip-cqa
 ```
-
-## Advanced options to use the script
-
-The command line options include:
-
-**Help file**
-- `--help`: Lists all available options
-
-**Extraction Mode**:
-- `--extract-toc URL`: Documentation URL to scrape (with or without version)
-- `--toc-output FILE`: Output file for extracted links (default: urls.txt)  
-- `--versions LIST`: Comma-separated versions (default: detected version or latest)
-
-**Notebook Mode**:
-- `--notebook URL`: NotebookLM notebook URL
-- `--links-file FILE`: Links file (default: urls.txt, always includes CQA_res.txt)
-- `--links URL [URL...]`: Individual URLs to add
-- `--skip-cqa`: Skip including CQA_res.txt when using file-based links
-
-**Authentication**:
-- `--login`: Run authentication process
-- `--profile-path PATH`: Browser profile directory (default: ~/.browser_automation)
-
-**Combined Workflows**:
-You can combine any of the three main operations in a single command:
-- `--extract-toc` + `--notebook`: Extract then add
-- `--login` + `--notebook`: Login then add  
-- `--extract-toc` + `--login` + `--notebook`: Full workflow
 
 ## Usage examples
 
