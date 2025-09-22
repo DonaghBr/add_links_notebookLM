@@ -4,18 +4,7 @@ Automate the process of extracting documentation URLs and adding them as sources
 
 ## Scripts Overview
 
-### `scrape_add_links_nblm_script.py` - Enhanced URL Extraction & Notebook Management
-- **Based on** This code is adapted from https://github.com/sshnaidm/notebooklm/blob/master/automation/add_links_script.py   
-- **Extract URLs** from documentation sites with version support
-- **Combined workflows** - run extraction, authentication, and notebook loading in one command
-- **Smart resource combination** - automatically combines scraped URLs with static CQA resources
-- **Add URLs to NotebookLM** with authe# NotebookLM Automation Tools
-
-Automate the process of extracting documentation URLs and adding them as sources to NotebookLM notebooks using browser automation.
-
-## Scripts Overview
-
-### `scrape_add_links_nblm_script.py` - Enhanced URL Extraction & Notebook Management
+The `scrape_add_links_nblm_script.py` script enhances URL extraction and Notebook management. The details of the script include:
 - **Based on** This code is adapted from https://github.com/sshnaidm/notebooklm/blob/master/automation/add_links_script.py   
 - **Extract URLs** from documentation sites with version support
 - **Combined workflows** - run extraction, authentication, and notebook loading in one command
@@ -34,61 +23,77 @@ Automate the process of extracting documentation URLs and adding them as sources
 - **Bulk URL Loading**: Add multiple URLs to NotebookLM automatically
 - **Error Handling**: Comprehensive error messages and recovery options
 - **YouTube & Website Support**: Handles both content types
+- **Smart Version Detection** The script automatically detects version numbers in URLs and handles them intelligently:
 
-## Quick Start
+    | URL Format | `--versions` Flag | Behavior |
+    |------------|------------------|----------|
+    | `https://docs.example.com/product/3.2` | Not specified | Uses detected version `3.2` |
+    | `https://docs.example.com/product/3.2` | `--versions 2.21,latest` | Ignores detected `3.2`, uses specified versions |
+    | `https://docs.example.com/product` | Not specified | Uses default `latest` |
+    | `https://docs.example.com/product` | `--versions 2.21,latest` | Uses specified versions |
+
+- **Supported Version Patterns**: Includes `/latest`, `/3.2`, `/v3.2`, `/2.21.1`
+- **Consistent File Handling**: The script uses **predictable file handling** for easier workflows:
+  - **Extraction**: Always saves to `urls.txt` (unless `--toc-output` specified)
+  - **Notebook Mode**: Always reads from `urls.txt` (unless `--links-file` specified)
+  - **Resource Combination**: Always includes `CQA_res.txt` static resources (unless `--skip-cqa` is used)
+  - **No Guessing**: Clear, consistent behavior every time
+
+## Installation
 
 ### Prerequisites
 - Python 3.7+
 - A NotebookLM account
 
-### Installation
+### Procedure
 
-#### Step 1: OPTIONAL - if Project Root is different to script directory
-From the script directory, navigate to where the virtual environment is located if it is different to where the ADD_LINKS_NOTEBOOK files are stored:
-```bash
-# Navigate to project root (where .venv is located) 
-cd ../add_links_notebook
-```
+1. OPTIONAL: If the project root is different from the script directory `add_links_notebook`, navigate to the location where the `.venv` directory is located:
+  ```bash
+  # Navigate to project root (where .venv is located) 
+  cd ../add_links_notebook
+  ```
 
-#### Step 2: Activate Virtual Environment
-Create a virtual environment
-```bash
-# If using this for the first time, create a new virtual environment
-python3 -m venv .venv
-```
+2. Create a virtual environment if it is not available. 
+  ```bash
+  # If using this for the first time, create a new virtual environment
+  python3 -m venv .venv
+  ```
+3. Activate the virtual environment:
+  ```bash
+  # Activate the existing virtual environment
+  source .venv/bin/activate
+  ```
+4. Install dependencies.
+  ```bash
+  python3 -m pip install -r requirements.txt
+  ```
 
-```bash
-# Activate the existing virtual environment
-source .venv/bin/activate
-```
-# Install dependencies
-```bash
-python3 -m pip install -r requirements.txt
-```
+5. Install browser binaries for Playwright.
+  ```bash
+  python3 -m playwright install
+  ```
 
-# Install browser binaries for Playwright - assuming you haven't installed it by running requirements.txt 
-```bash
-python3 -m playwright install
-```
+6. Install the Playwright browser.
+  ```bash
+  # Check Playwright is installed
+  playwright --version
+  ```
+7. Install Chromium browser to automate authentication.
+  ```bash
+  playwright install chromium
+  ```
 
-#### Step 3: Install Playwright Browser
-```bash
-# Check Playwright is installed
-playwright --version
+8. OPTIONAL: If your project root is different from the script directory, navigate back to the script directory:
+  ```bash
+  # Navigate back to script directory
+  cd ../add_scrapped_links_notebooklm
+  ```
 
-# Install Chromium browser for automation - needed for authentication
-playwright install chromium
-```
+**Note**: Always ensure the virtual environment is active (you should see `(.venv)` in your terminal prompt) before running the script.
 
-#### Step 4: OPTIONAL - if your Project Root is different to script directory Return to Script Directory
-```bash
-# Navigate back to script directory
-cd ../add_scrapped_links_notebooklm
-```
+## Different workflows to run the script
 
-**Note**: Always ensure the virtual environment is active (you should see `(.venv)` in your terminal prompt) before running the scripts.
-
-### Complete Workflow
+### Option 1: Single command workflows to run the script
 
 **Full Combined Workflow (One Command)**
 ```bash
@@ -96,129 +101,57 @@ cd ../add_scrapped_links_notebooklm
 python3 scrape_add_links_nblm_script.py --extract-toc "https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed" --login --notebook "https://notebooklm.google.com/notebook/YOUR_NOTEBOOK_ID"
 ```
 **Add links other than docs.redhat.com links (One Command)**
-
-##### Extract URLs, authenticate, and add to notebook in one command
-python3 scrape_add_links_nblm_script.py --login --notebook "https://notebooklm.google.com/notebook/YOUR_NOTEBOOK_ID" --links https://www.redhat.com/en/blog/red-hat-ai-inference-server-technical-deep-dive https://www.youtube.com/watch?v=b9BWbr_7xs8
-
-##### If you've already logged in, Extract URLs and add to notebook in one command
-python3 scrape_add_links_nblm_script.py --login --notebook "https://notebooklm.google.com/notebook/YOUR_NOTEBOOK_ID" --links https://www.redhat.com/en/blog/red-hat-ai-inference-server-technical-deep-dive https://www.youtube.com/watch?v=b9BWbr_7xs8
-
-
-#### Option 2: Step-by-Step Workflow
-
-**Step 1: Extract URLs from Documentation**
 ```bash
-# Extract from latest version (saves to urls.txt)
+python3 scrape_add_links_nblm_script.py --login --notebook "https://notebooklm.google.com/notebook/YOUR_NOTEBOOK_ID" --links https://www.redhat.com/en/blog/red-hat-ai-inference-server-technical-deep-dive https://www.youtube.com/watch?v=b9BWbr_7xs8
+```
+
+**If you've already logged in, extract URLs and add to notebook in one command**
+```bash
+python3 scrape_add_links_nblm_script.py --login --notebook "https://notebooklm.google.com/notebook/YOUR_NOTEBOOK_ID" --links https://www.redhat.com/en/blog/red-hat-ai-inference-server-technical-deep-dive https://www.youtube.com/watch?v=b9BWbr_7xs8
+```
+
+### Option 2: Step-by-Step workflow to run the script
+
+1. Extract URLs from the latest version or specific versions from your documentation: 
+```bash
+# Extract URLs from the latest version (saves to urls.txt)
 python3 scrape_add_links_nblm_script.py --extract-toc "https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed"
 ```
-# Or specify versions
+
 ```bash
+# Extract URLs from specific versions
 python3 scrape_add_links_nblm_script.py --extract-toc "https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed" --versions "latest,2.21,2.20"
 ```
 
-**Step 2: Authenticate with Google (First time only)**
+2. Authenticate with Google (first time only)
 ```bash
 python3 scrape_add_links_nblm_script.py --login
 ```
-- Opens browser window
-- Log in to Google manually
-- **IMPORTANT: Close the browser window after logging in** (saves session)
+  - Opens the browser window.
+  - Log in to Google manually.
+  **IMPORTANT: Close the browser window after logging in** (saves session).
 
-**Step 3: Create NotebookLM Notebook**
-1. Go to [NotebookLM](https://notebooklm.google.com/)
-2. Create a new notebook
-3. Copy the notebook URL
+3. Create a NotebookLM Notebook.
+  - Go to [NotebookLM](https://notebooklm.google.com/)
+  - Create a new notebook.
+  - Copy the notebook URL.
+  - Use the copied URL in the next step
 
-**Step 4: Add URLs to Notebook**
+4. Add URLs to your Notebook.
 ```bash
 python3 scrape_add_links_nblm_script.py --notebook "https://notebooklm.google.com/notebook/YOUR_NOTEBOOK_ID"
 ```
 **Note**: Automatically combines `urls.txt` (scraped URLs) + `CQA_res.txt` (static resources). Use `--skip-cqa` to exclude CQA_res.txt.
 
-## Detailed Usage
+## Generated files after running the script
 
-### Combined Workflow Examples
+- **`urls.txt`**: Primary file for scraped URLs (gets overwritten with each extraction)
+- **`CQA_res.txt`**: Static CQA resources (always included automatically)
+- **Combined**: Script automatically merges both files when adding to notebook
 
-```bash
-# Full workflow (extract → login → add):
-python3 scrape_add_links_nblm_script.py --extract-toc URL --login --notebook NOTEBOOK_URL
+## Advanced options to use the script
 
-# Extract then add (uses urls.txt automatically):
-python3 scrape_add_links_nblm_script.py --extract-toc URL --notebook NOTEBOOK_URL
-
-# Login then add (uses existing urls.txt):
-python3 scrape_add_links_nblm_script.py --login --notebook NOTEBOOK_URL
-```
-
-### URL Extraction Mode
-
-#### Extract with Default Version (latest)
-```bash
-python3 scrape_add_links_nblm_script.py --extract-toc "BASE_URL"
-```
-*Always saves to `urls.txt` unless `--toc-output` specified*
-
-#### Extract with Specific Versions
-```bash
-python3 scrape_add_links_nblm_script.py --extract-toc "BASE_URL" --versions "2.21,2.22,latest"
-```
-
-#### Smart Version Detection (URLs with Versions)
-```bash
-# URL contains version - uses detected version (3.2)
-python3 scrape_add_links_nblm_script.py --extract-toc "https://docs.redhat.com/en/documentation/red_hat_ai_inference_server/3.2"
-
-# URL contains version but override with --versions flag
-python3 scrape_add_links_nblm_script.py --extract-toc "https://docs.redhat.com/en/documentation/red_hat_ai_inference_server/3.2" --versions "latest,2.21"
-```
-*Script automatically detects and strips version from URL, then uses detected version or specified versions*
-
-#### Extract with Custom Output File
-```bash
-python3 scrape_add_links_nblm_script.py --extract-toc "BASE_URL" --toc-output custom_file.txt
-```
-
-### Authentication Mode
-```bash
-python3 scrape_add_links_nblm_script.py --login
-```
-
-### Notebook Management Mode
-
-#### Use Default Files (Recommended)
-```bash
-python3 scrape_add_links_nblm_script.py --notebook "NOTEBOOK_URL"
-```
-*Automatically combines:*
-- `urls.txt` (scraped URLs)
-- `CQA_res.txt` (static CQA resources)
-
-#### Specify Custom Links File
-```bash
-python3 scrape_add_links_nblm_script.py --notebook "NOTEBOOK_URL" --links-file custom_links.txt
-```
-*Still includes `CQA_res.txt` automatically (unless `--skip-cqa` is used)*
-
-#### Add Individual URLs
-```bash
-python3 scrape_add_links_nblm_script.py --notebook "NOTEBOOK_URL" --links "https://example.com" "https://youtube.com/watch?v=xyz"
-```
-
-#### Skip CQA Resources (Use Only Extracted/Custom Links)
-```bash
-# Use only extracted URLs (skip CQA_res.txt)
-python3 scrape_add_links_nblm_script.py --notebook "NOTEBOOK_URL" --skip-cqa
-
-# Use only custom file (skip CQA_res.txt)
-python3 scrape_add_links_nblm_script.py --notebook "NOTEBOOK_URL" --links-file custom.txt --skip-cqa
-
-# Full workflow with skip CQA
-python3 scrape_add_links_nblm_script.py --extract-toc "BASE_URL" --notebook "NOTEBOOK_URL" --skip-cqa
-```
-
-## Advanced Options
-
-### All Command Line Options
+The command line options include:
 
 **Help file**
 - `--help`: Lists all available options
@@ -244,29 +177,88 @@ You can combine any of the three main operations in a single command:
 - `--login` + `--notebook`: Login then add  
 - `--extract-toc` + `--login` + `--notebook`: Full workflow
 
-### Smart Version Detection
+## Advanced usage of the script
 
-The script automatically detects version numbers in URLs and handles them intelligently:
+### Combined workflow examples
+Run any of the following commands based on your use case:
+```bash
+# Full workflow (extract → login → add):
+python3 scrape_add_links_nblm_script.py --extract-toc URL --login --notebook NOTEBOOK_URL
 
-| URL Format | `--versions` Flag | Behavior |
-|------------|------------------|----------|
-| `https://docs.example.com/product/3.2` | Not specified | Uses detected version `3.2` |
-| `https://docs.example.com/product/3.2` | `--versions 2.21,latest` | Ignores detected `3.2`, uses specified versions |
-| `https://docs.example.com/product` | Not specified | Uses default `latest` |
-| `https://docs.example.com/product` | `--versions 2.21,latest` | Uses specified versions |
+# Extract then add (uses urls.txt automatically):
+python3 scrape_add_links_nblm_script.py --extract-toc URL --notebook NOTEBOOK_URL
 
-**Supported Version Patterns**: `/latest`, `/3.2`, `/v3.2`, `/2.21.1`
+# Login then add (uses existing urls.txt):
+python3 scrape_add_links_nblm_script.py --login --notebook NOTEBOOK_URL
+```
 
-### Consistent File Handling
+### URL extraction mode examples
 
-The script now uses **predictable file handling** for easier workflows:
+**_Extract with Default Version (latest)_**
+```bash
+python3 scrape_add_links_nblm_script.py --extract-toc "BASE_URL"
+```
+**Note**: Always saves to `urls.txt` unless `--toc-output` specified.
 
-- **Extraction**: Always saves to `urls.txt` (unless `--toc-output` specified)
-- **Notebook Mode**: Always reads from `urls.txt` (unless `--links-file` specified)
-- **Resource Combination**: Always includes `CQA_res.txt` static resources (unless `--skip-cqa` is used)
-- **No Guessing**: Clear, consistent behavior every time
+**_Extract with specific versions_**
+```bash
+python3 scrape_add_links_nblm_script.py --extract-toc "BASE_URL" --versions "2.21,2.22,latest"
+```
 
-## Usage Examples
+**_Smart version detection (URLs with versions)_**
+```bash
+# URL contains version - uses detected version (3.2)
+python3 scrape_add_links_nblm_script.py --extract-toc "https://docs.redhat.com/en/documentation/red_hat_ai_inference_server/3.2"
+
+# URL contains version but override with --versions flag
+python3 scrape_add_links_nblm_script.py --extract-toc "https://docs.redhat.com/en/documentation/red_hat_ai_inference_server/3.2" --versions "latest,2.21"
+```
+**Note**: Script automatically detects and strips version from URL, then uses detected version or specified versions.
+
+**_Extract with custom output file_**
+```bash
+python3 scrape_add_links_nblm_script.py --extract-toc "BASE_URL" --toc-output custom_file.txt
+```
+
+### Authentication mode example
+```bash
+python3 scrape_add_links_nblm_script.py --login
+```
+
+### Notebook management mode examples
+
+**_Use default files (Recommended)_**
+```bash
+python3 scrape_add_links_nblm_script.py --notebook "NOTEBOOK_URL"
+```
+This command automatically combines:
+- `urls.txt` (scraped URLs)
+- `CQA_res.txt` (static CQA resources)
+
+**_Use custom links file_**
+```bash
+python3 scrape_add_links_nblm_script.py --notebook "NOTEBOOK_URL" --links-file custom_links.txt
+```
+**Note**: Still includes `CQA_res.txt` automatically unless the `--skip-cqa` parameter is used.
+
+**_Add individual URLs_**
+```bash
+python3 scrape_add_links_nblm_script.py --notebook "NOTEBOOK_URL" --links "https://example.com" "https://youtube.com/watch?v=xyz"
+```
+
+**_Skip CQA resources (Use Only Extracted/Custom Links)_**
+```bash
+# Use only extracted URLs (skip CQA_res.txt)
+python3 scrape_add_links_nblm_script.py --notebook "NOTEBOOK_URL" --skip-cqa
+
+# Use only custom file (skip CQA_res.txt)
+python3 scrape_add_links_nblm_script.py --notebook "NOTEBOOK_URL" --links-file custom.txt --skip-cqa
+
+# Full workflow with skip CQA
+python3 scrape_add_links_nblm_script.py --extract-toc "BASE_URL" --notebook "NOTEBOOK_URL" --skip-cqa
+```
+
+## Usage examples
 
 ### Example 1: Red Hat OpenShift AI Documentation (Full Workflow)
 ```bash
@@ -384,11 +376,7 @@ python3 scrape_add_links_nblm_script.py --login
 - Ensure you closed the browser window after logging in
 - Try running the login step again
 
-## Generated Files
 
-- **`urls.txt`**: Primary file for scraped URLs (gets overwritten with each extraction)
-- **`CQA_res.txt`**: Static CQA resources (always included automatically)
-- **Combined**: Script automatically merges both files when adding to notebook
 
 ## Notes
 
@@ -402,18 +390,4 @@ python3 scrape_add_links_nblm_script.py --login
 - **Content Types**: Supports both website URLs and YouTube videos
 - **File Format**: All URL files should have one URL per line
 - **Combined Workflows**: Can run extraction, authentication, and notebook addition in single command
-
-ntication management
 - **All-in-one solution** for extraction and notebook loading
-
-## Features
-
-- **URL Extraction**: Scrape documentation hierarchies with smart version detection and support
-- **Combined Workflows**: Run extract → login → add in single command
-- **Static Resource Integration**: Automatically includes `CQA_res.txt` static links (optional with `--skip-cqa`)
-- **Consistent File Handling**: Always uses `urls.txt` for predictable behavior
-- **Version Support**: Auto-detects versions in URLs or specify versions like 2.19, 2.20 (defaults to "latest")
-- **Authentication Management**: Persistent Google login sessions
-- **Bulk URL Loading**: Add multiple URLs to NotebookLM automatically
-- **Error Handling**: Comprehensive error messages and recovery options
-- **YouTube & Website Support**: Handles both content types
